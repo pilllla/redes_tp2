@@ -1,21 +1,33 @@
-
+# Definicoes de Variaveis
 CC = gcc
-CFLAGS = -Wall -g -std=c99
-# LDFLAGS is for linking external libraries (e.g., -pthread for multi-threading)
-# LDFLAGS = -pthread
+CFLAGS = -Wall -std=c17 -g
+RM = rm -f
 
-TARGETS = client server
-COMMON_OBJS = utils.o
+# Objetos necessarios para o executavel 'client'
+CLIENT_OBJS = client.o utils.o
 
-.PHONY: all
-all: $(TARGETS)
+# Objetos necessarios para o executavel 'server'
+SERVER_OBJS = server.o utils.o
 
-$(TARGETS): %: %.o $(COMMON_OBJS)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+# Alvo default: constroi tanto o cliente quanto o servidor
+all: client server
 
-%.o: %.c utils.h
+# Regra para construir o client
+client: $(CLIENT_OBJS)
+	$(CC) $(CFLAGS) $(CLIENT_OBJS) -o client
+
+# Regra para construir o server
+server: $(SERVER_OBJS)
+	$(CC) $(CFLAGS) $(SERVER_OBJS) -o server
+
+# Regra generica para compilar arquivos .c em .o
+# O $< representa o arquivo de dependencia (.c) e $@ representa o alvo (.o)
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-.PHONY: clean
+# Adiciona a dependencia do utils.o em utils.h
+utils.o: utils.c utils.h
+
+# Alvo de limpeza: remove todos os arquivos objeto e executaveis gerados
 clean:
-	rm -f $(TARGETS) $(patsubst %, %.o, $(TARGETS)) $(COMMON_OBJS)
+	$(RM) $(CLIENT_OBJS) $(SERVER_OBJS) client server
